@@ -1,0 +1,7 @@
+{% extends "content/content_base.html" %}
+{% load add_attribute %}
+
+{% block content %}
+  <h1>{{ page.title }}</h1>
+  {{ page.body|safe }}
+{% endblock %}
