@@ -25,6 +25,8 @@ from categories.fields import CategoryFKField, CategoryM2MField
 
 from managers import *
 
+from taggit.managers import TaggableManager
+
 class Content(PolymorphicModel):
     """
     A newspaper or magazine type story or document that was possibly also
@@ -106,6 +108,8 @@ class Content(PolymorphicModel):
 
     objects = AlternateManager()
     published = CurrentSitePublishedManager()
+    tags = TaggableManager(blank=True)
+    with_counter = PopularPostManager()
 
     class Meta:
         verbose_name = _("content")
@@ -232,4 +236,4 @@ if settings.USE_REVERSION:
     except (ImportError, ):
         raise ImproperlyConfigured(rev_error_msg)
 
-    reversion.register(Story)
+    reversion.register(Content)
