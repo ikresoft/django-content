@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models.fields import FieldDoesNotExist
+from django.contrib.contenttypes.models import ContentType
 from django.conf import settings as site_settings
 from polymorphic.manager import PolymorphicManager
 from content import settings
@@ -100,4 +101,4 @@ class PopularPostManager(CurrentSiteManager):
     def get_query_set(self):
         qs = super(PopularPostManager, self).get_query_set()
         content_type = ContentType.objects.get_for_model(self.model).pk
-        return qs.extra(select={"counter": "SELECT hits from hitcount_hit_count where content_type_id = %s and object_pk = planet_post.id" % content_type}).order_by('-counter')
+        return qs.extra(select={"counter": "SELECT hits from hitcount_hit_count where content_type_id = %s and object_pk = id" % content_type}).order_by('-counter')

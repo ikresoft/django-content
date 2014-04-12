@@ -104,7 +104,7 @@ class ChildAdmin(PolymorphicChildModelAdmin):
 
     fieldsets = fieldsets + ((_('Advanced Options'), {
             'fields': ('slug', ('publish_date', 'publish_time'),
-                       'update_date', 'site', ),
+                       'date_modified', 'site', ),
             'classes': ('collapse',),
         }),)
 
@@ -146,7 +146,7 @@ class ChildAdmin(PolymorphicChildModelAdmin):
 
 class ContentAdmin(AdminModel):
     list_display = ('title', 'status', 'publish_date',
-                    'modified_date', 'origin')
+                    'date_modified', 'origin')
     list_filter = ('site', 'publish_date', 'origin')
     list_per_page = settings.ADMIN_EXTRAS.get('LIST_PER_PAGE', 25)
 

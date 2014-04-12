@@ -18,6 +18,7 @@ from django.template.loader import select_template
 from django.template import Context
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
+from django.utils.text import slugify
 from polymorphic import PolymorphicModel
 from content import settings
 
@@ -37,7 +38,7 @@ class Content(PolymorphicModel):
         max_length=100)
     slug = models.SlugField(
         _('Slug'),
-        max_length=50)
+        max_length=100)
     categories = CategoryM2MField(null=True, blank=True)
     authors = models.ManyToManyField(
         settings.AUTHOR_MODEL,
@@ -61,16 +62,9 @@ class Content(PolymorphicModel):
         help_text=_("The time the original story was published"),
         blank=True,
         null=True)
-    update_date = models.DateTimeField(
-        _('Update Date'),
-        help_text=_("The update date/time to display to the user"),
-        blank=True,
-        null=True)
-    modified_date = models.DateTimeField(
-        _("Date Modified"),
-        auto_now=True,
-        blank=True,
-        editable=False)
+
+    date_modified = models.DateTimeField(_("Date modified"), null=True, blank=True)
+    date_created = models.DateTimeField(_("Date created"), auto_now_add=True)
 
     print_pub_date = models.DateTimeField(
         _('Print Publish Date'),
@@ -121,7 +115,7 @@ class Content(PolymorphicModel):
     def get_absolute_url(self):
         pass
 
-    def get_front_image(self):
+    def get_image(self):
         from BeautifulSoup import BeautifulSoup
         from filer.models.imagemodels import Image
         soup = BeautifulSoup(self.body)
@@ -131,6 +125,7 @@ class Content(PolymorphicModel):
             return Image.objects.get(pk=id)
         except:
             return None
+    image = property(get_image)
 
     def save(self, *args, **kwargs):
         """
@@ -141,6 +136,7 @@ class Content(PolymorphicModel):
                 self.publish_date = datetime.now().date()
             if not self.publish_time:
                 self.publish_time = datetime.now().time()
+        self.slug = self.get_slug()
         super(Content, self).save(*args, **kwargs)
 
     @property
