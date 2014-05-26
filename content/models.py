@@ -22,8 +22,6 @@ from django.utils.text import slugify
 from polymorphic import PolymorphicModel
 from content import settings
 
-from categories.fields import CategoryFKField, CategoryM2MField
-
 from managers import *
 
 from taggit.managers import TaggableManager
@@ -39,7 +37,7 @@ class Content(PolymorphicModel):
     slug = models.SlugField(
         _('Slug'),
         max_length=100)
-    categories = CategoryM2MField(null=True, blank=True)
+
     authors = models.ManyToManyField(
         settings.AUTHOR_MODEL,
         verbose_name=_('Authors'),
@@ -52,16 +50,6 @@ class Content(PolymorphicModel):
         blank=True,
         null=True,
         help_text=_("An HTML-formatted rendering of an author(s) not on staff."))
-    publish_date = models.DateField(
-        _('Publish Date'),
-        help_text=_("The date the original story was published"),
-        blank=True,
-        null=True)
-    publish_time = models.TimeField(
-        _('Publish Time'),
-        help_text=_("The time the original story was published"),
-        blank=True,
-        null=True)
 
     date_modified = models.DateTimeField(_("Date modified"), null=True, blank=True)
     date_created = models.DateTimeField(_("Date created"), auto_now_add=True)
@@ -103,14 +91,14 @@ class Content(PolymorphicModel):
     objects = AlternateManager()
     published = CurrentSitePublishedManager()
     tags = TaggableManager(blank=True)
-    with_counter = PopularPostManager()
+    with_counter = PopularContentManager()
 
     class Meta:
         verbose_name = _("content")
         verbose_name_plural = _("Contents")
         ordering = settings.ORDERING
-        get_latest_by = 'publish_date'
-        unique_together = ('publish_date', 'slug')
+        get_latest_by = 'date_modified'
+        unique_together = ('date_modified', 'slug')
 
     def get_absolute_url(self):
         pass
@@ -131,11 +119,6 @@ class Content(PolymorphicModel):
         """
         Enforce setting of publish date and time if it is published.
         """
-        if self.status == settings.PUBLISHED_STATUS:
-            if not self.publish_date:
-                self.publish_date = datetime.now().date()
-            if not self.publish_time:
-                self.publish_time = datetime.now().time()
         self.slug = self.get_slug()
         super(Content, self).save(*args, **kwargs)
 
@@ -218,7 +201,7 @@ class Content(PolymorphicModel):
             return self.storyrelation_set.filter(relation_type=relation_type)
 
     def __unicode__(self):
-        return "%s : %s" % (self.title, self.publish_date)
+        return "%s : %s" % (self.title, self.date_modified)
 
 
 # Reversion integration

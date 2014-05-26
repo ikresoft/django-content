@@ -89,7 +89,7 @@ class ChildAdmin(PolymorphicChildModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('title', 'tease_title', 'body')
+            'fields': ('title', 'body')
         }),
         (_('Content data'), {
             'fields': ('authors', 'non_staff_author',
@@ -103,8 +103,7 @@ class ChildAdmin(PolymorphicChildModelAdmin):
         })
 
     fieldsets = fieldsets + ((_('Advanced Options'), {
-            'fields': ('slug', ('publish_date', 'publish_time'),
-                       'date_modified', 'site', ),
+            'fields': ('slug', 'date_modified', 'site', ),
             'classes': ('collapse',),
         }),)
 
@@ -145,16 +144,15 @@ class ChildAdmin(PolymorphicChildModelAdmin):
 
 
 class ContentAdmin(AdminModel):
-    list_display = ('title', 'status', 'publish_date',
-                    'date_modified', 'origin')
-    list_filter = ('site', 'publish_date', 'origin')
+    list_display = ('title', 'status', 'date_modified', 'origin')
+    list_filter = ('site', 'date_modified', 'origin')
     list_per_page = settings.ADMIN_EXTRAS.get('LIST_PER_PAGE', 25)
 
     list_editable = ()
     quick_editable = settings.QUICKEDIT_FIELDS
 
     search_fields = settings.ADMIN_EXTRAS.get('SEARCH_FIELDS', ('title',))
-    date_hierarchy = 'publish_date'
+    date_hierarchy = 'date_modified'
 
     form = ContentForm
 

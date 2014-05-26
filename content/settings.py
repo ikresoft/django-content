@@ -48,7 +48,7 @@ DEFAULT_SETTINGS = {
         'CHILD_MODELS': [],
     },
     'INCLUDE_PRINT': False,
-    'ORDERING': ['-publish_date'],
+    'ORDERING': ['-date_modified'],
     'ORIGIN_CHOICES': DEFAULT_ORIGIN_CHOICES,
     'PAGINATION': DEFAULT_PAGINATION,
     'PUBLISHED_STATUS': 4,

@@ -49,7 +49,7 @@ class CurrentSitePublishedManager(CurrentSiteManager):
     def get_query_set(self):
         queryset = super(CurrentSitePublishedManager, self).get_query_set()
         return queryset.filter(
-            publish_date__lte=datetime.now()
+            date_modified__lte=datetime.now()
         ).filter(
             status__exact=settings.PUBLISHED_STATUS
         )
@@ -60,29 +60,29 @@ class AlternateManager(CurrentSiteManager):
     This is the default manager. In some cases, if you only have access to the
     default manager, you can use the published() method to get the right stuff
     """
-    def unique_slug(self, publish_date, slug, exclude_id=None):
+    def unique_slug(self, date_modified, slug, exclude_id=None):
         """
         Check if the date/slug combination is unique
         """
         query_params = {
             'slug': slug[:50],
-            'publish_date': publish_date,
+            'date_modified': date_modified,
         }
         qset = self.get_query_set().filter(**query_params)
         if exclude_id:
             qset = qset.exclude(id=exclude_id)
         return qset.count() == 0
 
-    def get_unique_slug(self, publish_date, slug, story_id=None):
+    def get_unique_slug(self, date_modified, slug, story_id=None):
         """
         Return a unique slug by adding a digit to the end
         """
         query_params = {
-            'publish_date__year': publish_date.year,
-            'publish_date__month': publish_date.month,
-            'publish_date__day': publish_date.day
+            'date_modified__year': date_modified.year,
+            'date_modified__month': date_modified.month,
+            'date_modified__day': date_modified.day
         }
-        if not self.unique_slug(publish_date, slug, story_id):
+        if not self.unique_slug(date_modified, slug, story_id):
             # Allow up to 10,000 versions on the same date
             query_params['slug__startswith'] = slug[:46]
             num = self.get_query_set().filter(**query_params).count()
@@ -92,13 +92,13 @@ class AlternateManager(CurrentSiteManager):
     def published(self):
         queryset = self.get_query_set()
         return queryset.filter(
-            publish_date__lte=datetime.now()
+            date_modified__lte=datetime.now()
         ).filter(
             status__exact=settings.PUBLISHED_STATUS)
 
-class PopularPostManager(CurrentSiteManager):
+class PopularContentManager(CurrentSiteManager):
 
     def get_query_set(self):
-        qs = super(PopularPostManager, self).get_query_set()
+        qs = super(PopularContentManager, self).get_query_set()
         content_type = ContentType.objects.get_for_model(self.model).pk
         return qs.extra(select={"counter": "SELECT hits from hitcount_hit_count where content_type_id = %s and object_pk = id" % content_type}).order_by('-counter')
