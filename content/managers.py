@@ -65,7 +65,7 @@ class AlternateManager(CurrentSiteManager):
         Check if the date/slug combination is unique
         """
         query_params = {
-            'slug': slug[:50],
+            'slug': slug[:100],
             'date_modified': date_modified,
         }
         qset = self.get_query_set().filter(**query_params)

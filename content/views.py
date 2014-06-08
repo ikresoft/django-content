@@ -4,6 +4,8 @@
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.paginator import EmptyPage, InvalidPage
 from django.http import HttpResponseRedirect, Http404
+from django.template import TemplateDoesNotExist
+from django.template.loader import find_template
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
@@ -53,13 +55,17 @@ def admin_changeset_revert(request, story_id, revision_id,
                               context_instance=RequestContext(request))
 
 class ContentViewMixin(object):
-    def _get_templates(self):
+
+    def get_extra_data(self, **kwargs):
+        return {}
+
+    def _get_templates(self, name):
         return []
 
     def get_template_names(self, name):
         opts = self.object.get_real_instance()._meta
         app_label = opts.app_label
-        search_templates = self._get_templates() + [
+        search_templates = self._get_templates(name) + [
             "%s/%ss/%s.html" % (app_label, opts.object_name.lower(), name),
             "%s/%s.html" % (app_label, name),
             "%s.html" % name
@@ -77,6 +83,11 @@ class ContentViewMixin(object):
 class ContentListView(ListView, ContentViewMixin):
     model = Content
 
+    def get_context_data(self, **kwargs):
+        context = super(ContentDetailView, self).get_context_data(**kwargs)
+        context.update(self.get_extra_data(**kwargs))
+        return context
+
     def get_queryset(self):
         return self.model.published.all().order_by('-date_modified')
 
@@ -84,7 +95,7 @@ class ContentListView(ListView, ContentViewMixin):
         return self.get_template_names('list')
 
 
-class ContentDetailView(DetailView):
+class ContentDetailView(DetailView, ContentViewMixin):
     model = Content
 
     def get_context_data(self, **kwargs):
@@ -94,7 +105,8 @@ class ContentDetailView(DetailView):
             tags__name__in=list(self.object.tags.values_list('name', flat=True))
         ).exclude(id=self.object.id).distinct().order_by("-date_modified")
         context['related_posts'] = related_posts[:5]
+        context.update(self.get_extra_data(**kwargs))
         return context
 
     def get_template_names(self):
-        return self.get_template_names('detail')
+        return ContentViewMixin.get_template_names(self, 'detail')

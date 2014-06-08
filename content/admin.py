@@ -93,14 +93,8 @@ class ChildAdmin(PolymorphicChildModelAdmin):
         }),
         (_('Content data'), {
             'fields': ('authors', 'non_staff_author',
-                       'status', 'origin', 'comment_status', )
+                       'status', 'origin', 'allow_comments',)
         }),)
-
-    if settings.INCLUDE_PRINT:
-        fieldsets = fieldsets + (_('Print Information'), {
-            'fields': ('print_pub_date', 'print_section', 'print_page'),
-            'classes': ('collapse',),
-        })
 
     fieldsets = fieldsets + ((_('Advanced Options'), {
             'fields': ('slug', 'date_modified', 'site', ),

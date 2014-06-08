@@ -31,7 +31,10 @@ DEFAULT_PAGINATION = {
 }
 DEFAULT_QUICKEDIT_FIELDS = (
     'title',
-    'status',
+    'slug',
+    'password',
+    'private',
+    'tags',
 )
 
 DEFAULT_SETTINGS = {
@@ -47,7 +50,6 @@ DEFAULT_SETTINGS = {
         'LIST_PER_PAGE': 25,
         'CHILD_MODELS': [],
     },
-    'INCLUDE_PRINT': False,
     'ORDERING': ['-date_modified'],
     'ORIGIN_CHOICES': DEFAULT_ORIGIN_CHOICES,
     'PAGINATION': DEFAULT_PAGINATION,
@@ -66,21 +68,7 @@ USER_SETTINGS = getattr(settings, 'CONTENT_SETTINGS', {})
 
 DEFAULT_SETTINGS.update(USER_SETTINGS)
 
-COMMENTS_DISABLED = 0
-COMMENTS_ENABLED = 1
-COMMENTS_FROZEN = 2
-
-COMMENT_STATUSES = (
-    (COMMENTS_DISABLED, _('Comments Disabled')),
-    (COMMENTS_ENABLED, _('Comments Enabled')),
-    (COMMENTS_FROZEN, _('Comments Frozen'))
-)
-
 RELATIONS = [Q(app_label=al, model=m) for al, m in [x.split('.') for x in DEFAULT_SETTINGS['RELATION_MODELS']]]
-
-if 'STORY_ORDERING' in DEFAULT_SETTINGS:
-    warnings.warn('STORY_ORDERING is being deprecated; use ORDERING instead.', DeprecationWarning)
-    DEFAULT_SETTINGS['ORDERING'] = DEFAULT_SETTINGS.pop('STORY_ORDERING')
 
 globals().update(DEFAULT_SETTINGS)
 globals().update({'RELATIONS': RELATIONS})

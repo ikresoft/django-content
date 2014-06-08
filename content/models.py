@@ -31,12 +31,9 @@ class Content(PolymorphicModel):
     A newspaper or magazine type story or document that was possibly also
     printed in a periodical.
     """
-    title = models.CharField(
-        _("Title"),
-        max_length=100)
-    slug = models.SlugField(
-        _('Slug'),
-        max_length=100)
+    title = models.CharField(_("Title"), max_length=100)
+    body = models.TextField(_("Body"), null=True, blank=True)
+    slug = models.SlugField(_('Slug'), max_length=100)
 
     authors = models.ManyToManyField(
         settings.AUTHOR_MODEL,
@@ -44,6 +41,7 @@ class Content(PolymorphicModel):
         blank=True,
         null=True,
         limit_choices_to=settings.AUTHOR_MODEL_LIMIT_CHOICES)
+
     non_staff_author = models.CharField(
         _('Non-staff author(s)'),
         max_length=200,
@@ -53,39 +51,14 @@ class Content(PolymorphicModel):
 
     date_modified = models.DateTimeField(_("Date modified"), null=True, blank=True)
     date_created = models.DateTimeField(_("Date created"), auto_now_add=True)
+    password = models.CharField(max_length=20, null=True, blank=True)
+    private = models.BooleanField(default=False)
 
-    print_pub_date = models.DateTimeField(
-        _('Print Publish Date'),
-        blank=True,
-        null=True),
-    print_section = models.CharField(
-        _('Print Section'),
-        max_length=30,
-        blank=True,
-        null=True),
-    print_page = models.CharField(
-        _('Print Page'),
-        max_length=5,
-        blank=True,
-        null=True),
+    allow_comments = models.BooleanField(_('Allow comments'), default=True)
 
-    comments = models.BooleanField(
-        _('Enable Comments?'),
-        default=True)
-    comment_status = models.IntegerField(
-        _('Comment Status'),
-        choices=settings.COMMENT_STATUSES,
-        default=1
-    )
-    status = models.IntegerField(
-        _('Published Status'),
-        choices=settings.STATUS_CHOICES,
-        default=settings.DEFAULT_STATUS)
-    body = models.TextField(_("Body"), null=True, blank=True)
-    origin = models.IntegerField(
-        _("Origin"),
-        choices=settings.ORIGIN_CHOICES,
-        default=settings.DEFAULT_ORIGIN,)
+    status = models.IntegerField(_('Published Status'), choices=settings.STATUS_CHOICES, default=settings.DEFAULT_STATUS)
+
+    origin = models.IntegerField(_("Origin"), choices=settings.ORIGIN_CHOICES, default=settings.DEFAULT_ORIGIN,)
     site = models.ManyToManyField(Site, verbose_name=_('Sites'))
 
     objects = AlternateManager()
