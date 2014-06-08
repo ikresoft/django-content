@@ -92,6 +92,7 @@ class Content(PolymorphicModel):
         """
         Enforce setting of publish date and time if it is published.
         """
+        self.date_modified = datetime.now()
         self.slug = self.get_slug()
         super(Content, self).save(*args, **kwargs)
 
