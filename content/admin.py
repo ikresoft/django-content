@@ -9,7 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import curry
 from django.utils.importlib import import_module
 
-from polymorphic.admin import PolymorphicParentModelAdmin, PolymorphicChildModelAdmin
+from modeltranslation.admin import TranslationAdmin
 
 from content import settings
 from .forms import ContentForm
@@ -27,11 +27,14 @@ if HAS_RELATIONS:
 
 if settings.USE_REVERSION:
     from reversion.admin import VersionAdmin
-    class AdminModel(PolymorphicParentModelAdmin, VersionAdmin):
+    class AdminModel(TranslationAdmin, VersionAdmin):
         pass
 else:
-    class AdminModel(PolymorphicParentModelAdmin):
-        pass
+    class AdminModel(TranslationAdmin):
+        def formfield_for_dbfield(self, db_field, **kwargs):
+            field = super(AdminModel, self).formfield_for_dbfield(db_field, **kwargs)
+            self.patch_translation_field(db_field, field, **kwargs)
+            return field
 
 
 class ChangeStatus(object):
@@ -56,7 +59,8 @@ class ChangeStatus(object):
 
 admin_actions = [ChangeStatus(x, y) for x, y in settings.STATUS_CHOICES]
 
-class ChildAdmin(PolymorphicChildModelAdmin):
+
+class ContentAdmin(AdminModel):
     """
     The Content admin
 
@@ -78,6 +82,24 @@ class ChildAdmin(PolymorphicChildModelAdmin):
     the custom attribute `quick_editable`, which is a list of
     fields.
     """
+
+    change_list_template = 'admin/content/change_list.html'
+    revision_form_template = 'admin/content/reversion_form.html'
+    list_display = ('title', 'status', 'date_modified', 'origin')
+    list_filter = ('site', 'date_modified', 'origin')
+    list_per_page = settings.ADMIN_EXTRAS.get('LIST_PER_PAGE', 25)
+
+    list_editable = ()
+    quick_editable = settings.QUICKEDIT_FIELDS
+
+    search_fields = settings.ADMIN_EXTRAS.get('SEARCH_FIELDS', ('title',))
+    date_hierarchy = 'date_modified'
+
+    form = ContentForm
+
+    actions = admin_actions
+    actions_on_bottom = True
+
     prepopulated_fields = {'slug': ('title',)}
     raw_id_fields = settings.ADMIN_EXTRAS.get('RAW_ID_FIELDS', ())
 
@@ -101,15 +123,14 @@ class ChildAdmin(PolymorphicChildModelAdmin):
             'classes': ('collapse',),
         }),)
 
-    change_list_template = 'admin/content/change_list.html'
-    revision_form_template = 'admin/content/reversion_form.html'
-
     class Media:
+        js = ('js/quickedit.js',)
+        css = {'all': ('css/quickedit.css',)}
         if HAS_RELATIONS:
             js += ('js/genericcollections.js',)
 
     def __init__(self, *args, **kwargs):
-        super(ChildAdmin, self).__init__(*args, **kwargs)
+        super(ContentAdmin, self).__init__(*args, **kwargs)
 
         # Add in any extra fielsets
         self.fieldsets = list(self.fieldsets)
@@ -124,40 +145,6 @@ class ChildAdmin(PolymorphicChildModelAdmin):
                 self.fieldsets.insert(extra_fs.get('position'), fs)
             else:
                 self.fieldsets.append(fs)
-
-    def _get_widget(self):
-        attrs = settings.WIDGET_ATTRS
-        widget = load_widget(settings.WIDGET) or forms.Textarea
-        return widget(attrs=attrs)
-
-    def formfield_for_dbfield(self, db_field, **kwargs):
-        """Supply the widget to the body field"""
-        if db_field.name in settings.WIDGET_FIELDS:
-            return db_field.formfield(widget=self._get_widget())
-        return super(ChildAdmin, self).formfield_for_dbfield(db_field, **kwargs)
-
-
-class ContentAdmin(AdminModel):
-    list_display = ('title', 'status', 'date_modified', 'origin')
-    list_filter = ('site', 'date_modified', 'origin')
-    list_per_page = settings.ADMIN_EXTRAS.get('LIST_PER_PAGE', 25)
-
-    list_editable = ()
-    quick_editable = settings.QUICKEDIT_FIELDS
-
-    search_fields = settings.ADMIN_EXTRAS.get('SEARCH_FIELDS', ('title',))
-    date_hierarchy = 'date_modified'
-
-    form = ContentForm
-
-    actions = admin_actions
-    actions_on_bottom = True
-
-    base_model = Content
-
-    class Media:
-        js = ('js/quickedit.js',)
-        css = {'all': ('css/quickedit.css',)}
 
     def queryset(self, request):
         """
@@ -192,26 +179,13 @@ class ContentAdmin(AdminModel):
             fields=self.quick_editable,
             **defaults)
 
-    def get_child_models(self):
-        original = self.child_models if self.child_models is not None else []
-        settings_child_models = []
-        for child_model in settings.ADMIN_EXTRAS.get('CHILD_MODELS', []):
-            model_class_str, admin_class_str = child_model
-            #models class
-            module_name, class_name = model_class_str.rsplit(".", 1)
-            module = import_module(module_name)
-            model_class = getattr(module, class_name, None)
+    def _get_widget(self):
+        attrs = settings.WIDGET_ATTRS
+        widget = load_widget(settings.WIDGET) or forms.Textarea
+        return widget(attrs=attrs)
 
-            #admin class
-            module_name, class_name = admin_class_str.rsplit(".", 1)
-            module = import_module(module_name)
-            admin_class = getattr(module, class_name, None)
-
-            settings_child_models.append((model_class, admin_class))
-
-        if self.child_models is None and settings_child_models == []:
-            raise NotImplementedError("Implement get_child_models() or child_models")
-
-        return original + settings_child_models
-
-admin.site.register(Content, ContentAdmin)
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        """Supply the widget to the body field"""
+        if db_field.name in settings.WIDGET_FIELDS:
+            return db_field.formfield(widget=self._get_widget())
+        return super(ContentAdmin, self).formfield_for_dbfield(db_field, **kwargs)

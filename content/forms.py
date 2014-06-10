@@ -7,6 +7,8 @@ from django import forms
 from django.contrib.sites.models import Site
 from django.utils.translation import ugettext as _
 
+from modeltranslation.forms import TranslationModelForm
+
 from .models import Content
 
 WIDGET_ATTRS = {'size': '85'}
@@ -33,7 +35,7 @@ class SlugMixin(object):
 
         return self.cleaned_data['slug']
 
-class ContentForm(forms.ModelForm):
+class ContentForm(TranslationModelForm):
 
     title = forms.CharField(
         widget=forms.TextInput(attrs=WIDGET_ATTRS),
