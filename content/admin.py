@@ -9,6 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import curry
 from django.utils.importlib import import_module
 
+from modeltranslation.utils import get_language
 from modeltranslation.admin import TranslationAdmin
 
 from content import settings
@@ -85,6 +86,7 @@ class ContentAdmin(AdminModel):
 
     change_list_template = 'admin/content/change_list.html'
     revision_form_template = 'admin/content/reversion_form.html'
+    change_form_template = "admin/content/change_form.html"
     list_display = ('title', 'status', 'date_modified', 'origin')
     list_filter = ('site', 'date_modified', 'origin')
     list_per_page = settings.ADMIN_EXTRAS.get('LIST_PER_PAGE', 25)
@@ -189,3 +191,20 @@ class ContentAdmin(AdminModel):
         if db_field.name in settings.WIDGET_FIELDS:
             return db_field.formfield(widget=self._get_widget())
         return super(ContentAdmin, self).formfield_for_dbfield(db_field, **kwargs)
+
+    def all_translations(self, obj):
+        return ''
+    all_translations.allow_tags = True
+    all_translations.short_description = _('all translations')
+
+    def get_language_tabs(self, request):
+        langs = []
+        for key, name in site_settings.LANGUAGES:
+            langs.append((name, key))
+        return langs
+
+    def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
+        context['selected_language'] = get_language()
+        context['languages'] = self.get_language_tabs(request)
+        #context['base_template'] = self.get_change_form_base_template()
+        return super(ContentAdmin, self).render_change_form(request, context, add, change, form_url, obj)

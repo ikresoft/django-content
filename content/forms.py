@@ -7,7 +7,6 @@ from django import forms
 from django.contrib.sites.models import Site
 from django.utils.translation import ugettext as _
 
-from modeltranslation.forms import TranslationModelForm
 
 from .models import Content
 
@@ -35,11 +34,11 @@ class SlugMixin(object):
 
         return self.cleaned_data['slug']
 
-class ContentForm(TranslationModelForm):
+class ContentForm(forms.ModelForm):
 
-    title = forms.CharField(
-        widget=forms.TextInput(attrs=WIDGET_ATTRS),
-        max_length=100)
+    #title = forms.CharField(
+    #    widget=forms.TextInput(attrs=WIDGET_ATTRS),
+    #    max_length=100)
     non_staff_author = forms.CharField(
         widget=forms.TextInput(attrs=WIDGET_ATTRS),
         help_text=_('An HTML-formatted rendering of the author(s) not on staff.'),
@@ -48,6 +47,9 @@ class ContentForm(TranslationModelForm):
 
     class Meta:
         model = Content
+        widgets = {
+            'title': forms.TextInput(attrs={'size': '100', 'style': 'width=100%;'})
+        }
 
     def __init__(self, *args, **kwargs):
         initial = kwargs.get('initial', {})
