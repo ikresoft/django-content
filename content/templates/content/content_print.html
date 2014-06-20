@@ -1,9 +1,0 @@
-{% extends "content/content_base.html" %}
-
-{% block content %}
-  <h1>{{ content.headline }}</h1>
-  {% if content.subheadline %}<h2>{{ content.subheadline|safe }}</h2>{% endif %}
-  <p class="byline">By {{ content.author }}</p>
-  <hr/>
-  {{ content.body|safe }}
-{% endblock %}

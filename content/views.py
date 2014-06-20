@@ -63,14 +63,13 @@ class ContentViewMixin(object):
         return []
 
     def get_template_names(self, name):
-        opts = self.object.get_real_instance()._meta
+        opts = self.model._meta
         app_label = opts.app_label
         search_templates = self._get_templates(name) + [
             "%s/%ss/%s.html" % (app_label, opts.object_name.lower(), name),
             "%s/%s.html" % (app_label, name),
             "%s.html" % name
         ]
-
         for template in search_templates:
             try:
                 find_template(template)
@@ -80,11 +79,11 @@ class ContentViewMixin(object):
         else:  # pragma: no cover
             pass
 
-class ContentListView(ListView, ContentViewMixin):
+class ContentListView(ContentViewMixin, ListView):
     model = Content
 
     def get_context_data(self, **kwargs):
-        context = super(ContentDetailView, self).get_context_data(**kwargs)
+        context = super(ContentListView, self).get_context_data(**kwargs)
         context.update(self.get_extra_data(**kwargs))
         return context
 
@@ -92,7 +91,7 @@ class ContentListView(ListView, ContentViewMixin):
         return self.model.published.all().order_by('-date_modified')
 
     def get_template_names(self):
-        return self.get_template_names('list')
+        return ContentViewMixin.get_template_names(self, 'list')
 
 
 class ContentDetailView(DetailView, ContentViewMixin):
@@ -104,7 +103,7 @@ class ContentDetailView(DetailView, ContentViewMixin):
         related_posts = self.model.published.filter(
             tags__name__in=list(self.object.tags.values_list('name', flat=True))
         ).exclude(id=self.object.id).distinct().order_by("-date_modified")
-        context['related_posts'] = related_posts[:5]
+        context['related_content'] = related_posts[:5]
         context.update(self.get_extra_data(**kwargs))
         return context
 

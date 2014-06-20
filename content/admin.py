@@ -9,13 +9,14 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import curry
 from django.utils.importlib import import_module
 
-from modeltranslation.utils import get_language
-from modeltranslation.admin import TranslationAdmin
-
 from content import settings
 from .forms import ContentForm
 from .models import Content
 from .utils import load_widget
+
+if settings.USE_TRANSLATION:
+    from modeltranslation.utils import get_language
+    from modeltranslation.admin import TranslationAdmin
 
 HAS_RELATIONS = 'content.relations' in site_settings.INSTALLED_APPS and settings.RELATIONS
 
@@ -28,10 +29,15 @@ if HAS_RELATIONS:
 
 if settings.USE_REVERSION:
     from reversion.admin import VersionAdmin
-    class AdminModel(TranslationAdmin, VersionAdmin):
+    class AdminModel(admin.ModelAdmin, VersionAdmin):
         pass
 else:
-    class AdminModel(TranslationAdmin):
+    class AdminModel(admin.ModelAdmin):
+        pass
+
+if settings.USE_TRANSLATION:
+    class AdminModel(AdminModel):
+
         def formfield_for_dbfield(self, db_field, **kwargs):
             field = super(AdminModel, self).formfield_for_dbfield(db_field, **kwargs)
             self.patch_translation_field(db_field, field, **kwargs)
@@ -113,7 +119,7 @@ class ContentAdmin(AdminModel):
 
     fieldsets = (
         (None, {
-            'fields': ('title', 'body')
+            'fields': (('title', 'slug'), 'body')
         }),
         (_('Content data'), {
             'fields': ('authors', 'non_staff_author',
@@ -121,7 +127,7 @@ class ContentAdmin(AdminModel):
         }),)
 
     fieldsets = fieldsets + ((_('Advanced Options'), {
-            'fields': ('slug', 'date_modified', 'site', ),
+            'fields': ('date_modified', 'site', ),
             'classes': ('collapse',),
         }),)
 
@@ -192,19 +198,21 @@ class ContentAdmin(AdminModel):
             return db_field.formfield(widget=self._get_widget())
         return super(ContentAdmin, self).formfield_for_dbfield(db_field, **kwargs)
 
-    def all_translations(self, obj):
-        return ''
-    all_translations.allow_tags = True
-    all_translations.short_description = _('all translations')
+    if settings.USE_TRANSLATION:
 
-    def get_language_tabs(self, request):
-        langs = []
-        for key, name in site_settings.LANGUAGES:
-            langs.append((name, key))
-        return langs
+        def all_translations(self, obj):
+            return ''
+        all_translations.allow_tags = True
+        all_translations.short_description = _('all translations')
 
-    def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
-        context['selected_language'] = get_language()
-        context['languages'] = self.get_language_tabs(request)
-        #context['base_template'] = self.get_change_form_base_template()
-        return super(ContentAdmin, self).render_change_form(request, context, add, change, form_url, obj)
+        def get_language_tabs(self, request):
+            langs = []
+            for key, name in site_settings.LANGUAGES:
+                langs.append((name, key))
+            return langs
+
+        def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
+            context['selected_language'] = get_language()
+            context['languages'] = self.get_language_tabs(request)
+            #context['base_template'] = self.get_change_form_base_template()
+            return super(ContentAdmin, self).render_change_form(request, context, add, change, form_url, obj)
