@@ -36,7 +36,7 @@ else:
         pass
 
 if settings.USE_TRANSLATION:
-    class AdminModel(AdminModel):
+    class AdminModel(AdminModel, TranslationAdmin):
 
         def formfield_for_dbfield(self, db_field, **kwargs):
             field = super(AdminModel, self).formfield_for_dbfield(db_field, **kwargs)
