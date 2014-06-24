@@ -48,7 +48,7 @@ class Content(PolymorphicModel):
         null=True,
         help_text=_("An HTML-formatted rendering of an author(s) not on staff."))
 
-    date_modified = models.DateTimeField(_("Date modified"), null=True, blank=True)
+    date_modified = models.DateTimeField(_("Date modified"), null=True, blank=True, default=now)
     date_created = models.DateTimeField(_("Date created"), auto_now_add=True)
     password = models.CharField(max_length=20, null=True, blank=True)
     private = models.BooleanField(default=False)
@@ -92,8 +92,6 @@ class Content(PolymorphicModel):
         """
         Enforce setting of publish date and time if it is published.
         """
-        if self.date_modified is None:
-            self.date_modified = now()
         self.slug = self.get_slug()
         super(Content, self).save(*args, **kwargs)
 

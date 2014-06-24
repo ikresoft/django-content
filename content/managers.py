@@ -5,7 +5,7 @@ from django.conf import settings as site_settings
 from polymorphic.manager import PolymorphicManager
 from content import settings
 
-from datetime import datetime
+from django.utils import timezone
 
 class CurrentSiteManager(PolymorphicManager):
     "Use this to limit objects to those associated with the current site."
@@ -49,7 +49,7 @@ class CurrentSitePublishedManager(CurrentSiteManager):
     def get_query_set(self):
         queryset = super(CurrentSitePublishedManager, self).get_query_set()
         return queryset.filter(
-            date_modified__lte=datetime.now()
+            date_modified__lte=timezone.now()
         ).filter(
             status__exact=settings.PUBLISHED_STATUS
         )
@@ -66,8 +66,11 @@ class AlternateManager(CurrentSiteManager):
         """
         query_params = {
             'slug': slug[:100],
-            'date_modified': date_modified,
+            'date_modified__year': date_modified.year,
+            'date_modified__month': date_modified.month,
+            'date_modified__day': date_modified.day
         }
+
         qset = self.get_query_set().filter(**query_params)
         if exclude_id:
             qset = qset.exclude(id=exclude_id)
@@ -84,15 +87,15 @@ class AlternateManager(CurrentSiteManager):
         }
         if not self.unique_slug(date_modified, slug, story_id):
             # Allow up to 10,000 versions on the same date
-            query_params['slug__startswith'] = slug[:46]
+            query_params['slug__startswith'] = slug[:96]
             num = self.get_query_set().filter(**query_params).count()
-            slug = '%s%s' % (slug[:46], str(num + 1))
+            slug = '%s%s' % (slug[:96], str(num + 1))
         return slug
 
     def published(self):
         queryset = self.get_query_set()
         return queryset.filter(
-            date_modified__lte=datetime.now()
+            date_modified__lte=timezone.now()
         ).filter(
             status__exact=settings.PUBLISHED_STATUS)
 
