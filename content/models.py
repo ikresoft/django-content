@@ -77,7 +77,7 @@ class Content(PolymorphicModel):
         pass
 
     def get_image(self):
-        from BeautifulSoup import BeautifulSoup
+        from bs4 import BeautifulSoup
         from filer.models.imagemodels import Image
         soup = BeautifulSoup(self.body)
         img_tag = soup.find("img", { "front_image" : "true" })
