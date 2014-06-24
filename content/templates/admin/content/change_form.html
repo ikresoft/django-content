@@ -44,10 +44,11 @@
 
 {% block sidebar %}
 {{ block.super }}
-
+{% if languages %}
 <select id="language_box" style="width: 100%">
 	{% for lang in languages %}
 	<option value="{{ lang.1 }}" {% if selected_language == lang.1 %}selected="selected"{% endif %}>{{ lang.0 }}</option>
 	{% endfor %}
 </select>
+{% endif %}
 {% endblock %}
