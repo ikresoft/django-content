@@ -6,8 +6,6 @@ This module provides the Content model for reporting news, events, info etc.
 """
 import re
 
-from datetime import datetime
-
 from django.contrib.sites.models import Site
 from django.contrib.sites.managers import CurrentSiteManager
 from django.conf import settings as site_settings
@@ -19,6 +17,7 @@ from django.template import Context
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 from django.utils.text import slugify
+from django.utils.timezone import now
 from polymorphic import PolymorphicModel
 from content import settings
 
@@ -63,7 +62,8 @@ class Content(PolymorphicModel):
 
     objects = AlternateManager()
     published = CurrentSitePublishedManager()
-    tags = TaggableManager(blank=True)
+    if 'taggit' in site_settings.INSTALLED_APPS:
+        tags = TaggableManager(blank=True)
     with_counter = PopularContentManager()
 
     class Meta:
@@ -93,7 +93,7 @@ class Content(PolymorphicModel):
         Enforce setting of publish date and time if it is published.
         """
         if self.date_modified is None:
-            self.date_modified = datetime.now()
+            self.date_modified = now()
         self.slug = self.get_slug()
         super(Content, self).save(*args, **kwargs)
 
