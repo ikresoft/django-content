@@ -42,6 +42,7 @@ class ContentForm(forms.ModelForm):
         if not instance and not 'site' in initial:
             initial['site'] = (Site.objects.get_current().id, )
 
-        initial['tags'] = instance.tags.all()
+        if instance is not None:
+            initial['tags'] = instance.tags.all()
         kwargs.update({'initial': initial})
         super(ContentForm, self).__init__(*args, **kwargs)
