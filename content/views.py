@@ -91,6 +91,8 @@ class ContentListView(ContentViewMixin, ListView):
         return self.model.published.all().order_by('-date_modified')
 
     def get_template_names(self):
+        if self.template_name is not None or self.template_name != '':
+            return self.template_name
         return ContentViewMixin.get_template_names(self, 'list')
 
 
@@ -108,4 +110,6 @@ class ContentDetailView(DetailView, ContentViewMixin):
         return context
 
     def get_template_names(self):
+        if self.template_name is not None or self.template_name != '':
+            return self.template_name
         return ContentViewMixin.get_template_names(self, 'detail')

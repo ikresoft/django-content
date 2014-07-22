@@ -17,7 +17,7 @@ from django.template import Context
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 from django.utils.text import slugify
-from django.utils.timezone import now
+from django.utils import timezone
 from polymorphic import PolymorphicModel
 from content import settings
 
@@ -48,7 +48,7 @@ class Content(PolymorphicModel):
         null=True,
         help_text=_("An HTML-formatted rendering of an author(s) not on staff."))
 
-    date_modified = models.DateTimeField(_("Date modified"), null=True, blank=True, default=now)
+    date_modified = models.DateTimeField(_("Date modified"), null=True, blank=True, default=timezone.now)
     date_created = models.DateTimeField(_("Date created"), auto_now_add=True)
     password = models.CharField(max_length=20, null=True, blank=True)
     private = models.BooleanField(default=False)
@@ -174,7 +174,7 @@ class Content(PolymorphicModel):
             return self.storyrelation_set.filter(relation_type=relation_type)
 
     def __unicode__(self):
-        return "%s : %s" % (self.title, self.date_modified)
+        return "%s" % self.title
 
 
 # Reversion integration

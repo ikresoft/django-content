@@ -31,9 +31,6 @@ class ContentForm(forms.ModelForm):
 
     class Meta:
         model = Content
-        widgets = {
-            'title': forms.TextInput(attrs={'size': '100', 'style': 'width=100%;'})
-        }
 
     def __init__(self, *args, **kwargs):
         initial = kwargs.get('initial', {})

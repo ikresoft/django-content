@@ -119,7 +119,11 @@ class ContentAdmin(AdminModel):
 
     fieldsets = (
         (None, {
-            'fields': (('title', 'slug'), 'body')
+            'fields': ('title', 'slug')
+        }),
+        (_('Body'), {
+            'fields': ('body', ),
+            'classes': ('full-width'),
         }),
         (_('Content data'), {
             'fields': ('authors', 'non_staff_author',
