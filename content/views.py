@@ -54,6 +54,7 @@ def admin_changeset_revert(request, story_id, revision_id,
                                'changeset': changeset},
                               context_instance=RequestContext(request))
 
+
 class ContentViewMixin(object):
 
     def get_extra_data(self, **kwargs):
@@ -76,8 +77,9 @@ class ContentViewMixin(object):
                 return [template]
             except TemplateDoesNotExist:
                 pass
-        else:  # pragma: no cover
+        else:
             pass
+
 
 class ContentListView(ContentViewMixin, ListView):
     model = Content
@@ -110,6 +112,6 @@ class ContentDetailView(DetailView, ContentViewMixin):
         return context
 
     def get_template_names(self):
-        if self.template_name is not None or self.template_name != '':
+        if self.template_name is not None and self.template_name != '':
             return self.template_name
         return ContentViewMixin.get_template_names(self, 'detail')

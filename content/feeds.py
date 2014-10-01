@@ -14,17 +14,17 @@ ITEMS_PER_FEED = getattr(settings, 'CONTENT_ITEMS_PER_FEED', 50)
 class ContentFeed(Feed):
 
     def __init__(self, *args, **kwargs):
-        super(PostFeed, self).__init__(*args, **kwargs)
+        super(ContentFeed, self).__init__(*args, **kwargs)
         self.site = Site.objects.get_current()
 
     def title(self):
-        return u"%s latest posts" % (self.site.name, )
+        return u"%s latest contents" % (self.site.name, )
 
     def link(self):
         return reverse("content_rss_feed")
 
     def items(self):
-        return Post.objects.order_by('-date_modified')
+        return Content.objects.order_by('-date_modified')
 
     def item_title(self, content):
         return content.title
@@ -51,7 +51,7 @@ class ContentFeed(Feed):
         return [{"name" : content.author}]
 
 
-class AuthorFeed(PostFeed):
+class AuthorFeed(ContentFeed):
 
     def get_object(self, request, author_id):
         return get_object_or_404(Author, pk=author_id)
@@ -64,7 +64,7 @@ class AuthorFeed(PostFeed):
         return ({'href': reverse("planet_author_show", args=(author.pk, author.get_slug()))},)
 
     def items(self, author):
-        return Post.objects.filter(authors=author,
+        return Content.objects.filter(authors=author,
             ).distinct().order_by("-date_created")[:ITEMS_PER_FEED]
 
 
@@ -74,7 +74,7 @@ class TagFeed(ContentFeed):
         return get_object_or_404(Tag, name=tag)
 
     def title(self, tag):
-        return _("Posts under %(tag)s tag - %(site_name)s") %\
+        return _("Contents under %(tag)s tag - %(site_name)s") %\
             {'tag': tag, 'site_name': self.site.name}
 
     def links(self, tag):
@@ -83,18 +83,18 @@ class TagFeed(ContentFeed):
     def items(self, tag):
 
         return TaggedItem.objects.get_by_model(
-            Post.objects.filter(feed__site=self.site), tag)\
+            Content.objects.filter(feed__site=self.site), tag)\
             .distinct().order_by("-date_created")[:ITEMS_PER_FEED]
 
 
-class AuthorTagFeed(PostFeed):
+class AuthorTagFeed(ContentFeed):
 
     def get_object(self, request, author_id, tag):
         self.tag = tag
         return get_object_or_404(Author, pk=author_id)
 
     def title(self, author):
-        return _("Posts by %(author_name)s under %(tag)s tag - %(site_name)s")\
+        return _("Contents by %(author_name)s under %(tag)s tag - %(site_name)s")\
             % {'author_name': author.name, 'tag': self.tag, 'site_name': self.site.name}
 
     def links(self, author):
@@ -102,5 +102,5 @@ class AuthorTagFeed(PostFeed):
 
     def items(self, author):
         return TaggedItem.objects.get_by_model(
-            Post.objects.filter(feed__site=self.site, authors=author), self.tag)\
+            Content.objects.filter(feed__site=self.site, authors=author), self.tag)\
             .distinct().order_by("-date_created")[:ITEMS_PER_FEED]
