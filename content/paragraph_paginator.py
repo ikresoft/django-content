@@ -1,5 +1,5 @@
 from django.core.paginator import Paginator
-from BeautifulSoup import BeautifulSoup, Tag
+from bs4 import BeautifulSoup, Tag
 
 class ParagraphPaginator(Paginator):
     """

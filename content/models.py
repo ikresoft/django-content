@@ -7,16 +7,13 @@ This module provides the Content model for reporting news, events, info etc.
 import re
 
 from django.contrib.sites.models import Site
-from django.contrib.sites.managers import CurrentSiteManager
 from django.conf import settings as site_settings
 from django.core.exceptions import ImproperlyConfigured
-from django.core.urlresolvers import reverse
 from django.db import models
 from django.template.loader import select_template
 from django.template import Context
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
-from django.utils.text import slugify
 from django.utils import timezone
 from polymorphic import PolymorphicModel
 from content import settings
@@ -24,6 +21,7 @@ from content import settings
 from managers import *
 
 from taggit.managers import TaggableManager
+
 
 class Content(PolymorphicModel):
     """

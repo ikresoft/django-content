@@ -7,16 +7,11 @@ from django.contrib import admin
 from django.forms.models import modelformset_factory, modelform_factory
 from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import curry
-from django.utils.importlib import import_module
 
 from content import settings
 from .forms import ContentForm
-from .models import Content
 from .utils import load_widget
 
-if settings.USE_TRANSLATION:
-    from modeltranslation.utils import get_language
-    from modeltranslation.admin import TranslationAdmin
 
 HAS_RELATIONS = 'content.relations' in site_settings.INSTALLED_APPS and settings.RELATIONS
 
@@ -29,6 +24,7 @@ if HAS_RELATIONS:
 
 if settings.USE_REVERSION:
     from reversion.admin import VersionAdmin
+
     class AdminModel(admin.ModelAdmin, VersionAdmin):
         pass
 else:
@@ -36,6 +32,9 @@ else:
         pass
 
 if settings.USE_TRANSLATION:
+    from modeltranslation.utils import get_language
+    from modeltranslation.admin import TranslationAdmin
+
     class AdminModel(AdminModel, TranslationAdmin):
 
         def formfield_for_dbfield(self, db_field, **kwargs):
@@ -114,9 +113,6 @@ class ContentAdmin(AdminModel):
     filter_horizontal = settings.ADMIN_EXTRAS.get(
         'FILTER_HORIZONTAL_FIELDS', ('authors',))
 
-    if HAS_RELATIONS:
-        inlines = [InlineStoryRelation, ]
-
     fieldsets = (
         (None, {
             'fields': ('title', 'slug')
@@ -151,7 +147,7 @@ class ContentAdmin(AdminModel):
                     'fields': extra_fs['fields'],
                     'classes': extra_fs.get('classes', ()),
                     'description': extra_fs.get('description', None)
-                 })
+                })
 
             if 'position' in extra_fs:
                 self.fieldsets.insert(extra_fs.get('position'), fs)
@@ -169,9 +165,9 @@ class ContentAdmin(AdminModel):
             qs = qs.order_by(*ordering)
         return qs
 
-    def changelist_view(self, *args, **kwargs):
-        self.list_editable = True
-        return super(ContentAdmin, self).changelist_view(*args, **kwargs)
+    #def changelist_view(self, *args, **kwargs):
+    #    self.list_editable = True
+    #    return super(ContentAdmin, self).changelist_view(*args, **kwargs)
 
     def get_changelist_formset(self, request, **kwargs):
         """
