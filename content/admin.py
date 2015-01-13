@@ -9,7 +9,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import curry
 
 from content import settings
-from .forms import ContentForm
+from models import Category
+from .forms import ContentForm, CategoryContentForm
 from .utils import load_widget
 
 
@@ -89,7 +90,7 @@ class ContentAdmin(AdminModel):
     fields.
     """
 
-    change_list_template = 'admin/content/change_list.html'
+    change_list_template = 'admin/content/content_change_list.html'
     revision_form_template = 'admin/content/reversion_form.html'
     change_form_template = "admin/content/change_form.html"
     list_display = ('title', 'status', 'date_modified', 'origin')
@@ -154,7 +155,7 @@ class ContentAdmin(AdminModel):
             else:
                 self.fieldsets.append(fs)
 
-    def queryset(self, request):
+    def get_queryset(self, request):
         """
         Need to override to show all the contents. Default manager
         only shows published contents
@@ -216,3 +217,37 @@ class ContentAdmin(AdminModel):
             context['languages'] = self.get_language_tabs(request)
             #context['base_template'] = self.get_change_form_base_template()
             return super(ContentAdmin, self).render_change_form(request, context, add, change, form_url, obj)
+
+
+class CategoryContentAdmin(ContentAdmin):
+    quick_editable = (
+        'title',
+        'slug',
+        'password',
+        'private',
+        'categories',
+        'tags',
+    )
+    fieldsets = (
+        (None, {
+            'fields': ('title',)
+        }),
+        (_('Content'), {
+            'fields': ('body',),
+            'classes': ('full-width',),
+        }),
+        ('Categories', {
+            'fields': ('categories',),
+        }),
+        (_('Post data'), {
+            'fields': ('authors', 'non_staff_author',
+                       'status', 'origin', 'allow_comments', 'allow_pings', 'is_sticky')
+        }),)
+
+    fieldsets = fieldsets + ((_('Advanced Options'), {
+            'fields': ('slug', 'date_modified', 'site', ),
+            'classes': ('collapse',),
+        }),)
+    form = CategoryContentForm
+
+admin.site.register(Category)

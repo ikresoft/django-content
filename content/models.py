@@ -21,6 +21,7 @@ from content import settings
 from managers import *
 
 from taggit.managers import TaggableManager
+from categories.models import CategoryBase
 
 
 class Content(PolymorphicModel):
@@ -187,3 +188,33 @@ if settings.USE_REVERSION:
         raise ImproperlyConfigured(rev_error_msg)
 
     reversion.register(Content)
+
+
+class Category(CategoryBase):
+    """
+    A simple of catgorizing example
+    """
+
+    @property
+    def short_title(self):
+        return self.name
+
+    class Meta(CategoryBase.Meta):
+        verbose_name_plural = 'Categories'
+
+
+class CategoryContent(Content):
+    categories = models.ManyToManyField(Category, null=True, blank=True)
+    allow_pings = models.BooleanField(_('Allow pings'), default=True)
+    is_sticky = models.BooleanField(default=False)
+
+    @classmethod
+    def get_path(cls, category):
+        ancestors = list(category.get_ancestors()) + [category, ]
+        path = '/'.join([force_unicode(i.slug) for i in ancestors])
+        return path
+
+    def get_absolute_url(self, category=None):
+        if self.category is None:
+            category = self.categories.all()[0]
+        return reverse('category_content_detail', args=[CategoryContent.get_path(category), self.slug])

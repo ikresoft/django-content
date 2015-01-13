@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from django.contrib.admin.views.decorators import staff_member_required
-from django.core.paginator import EmptyPage, InvalidPage
-from django.http import HttpResponseRedirect, Http404
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.http import Http404
 from django.template import TemplateDoesNotExist
 from django.template.loader import find_template
 from django.shortcuts import render_to_response
@@ -12,12 +12,12 @@ from django.template import RequestContext
 from django.views.generic import ListView, DetailView
 
 from content import settings
-from .models import Content
-from .paragraph_paginator import ParagraphPaginator
+from .models import Content, CategoryContent
+from categories.views import get_category_for_path
+
 
 @staff_member_required
-def admin_changeset_list(request, content_id,
-    template_name='admin/content/changesets.html'):
+def admin_changeset_list(request, content_id, template_name='admin/content/changesets.html'):
     try:
         content = Content.objects.get(pk=content_id)
     except Content.DoesNotExist:
@@ -28,30 +28,6 @@ def admin_changeset_list(request, content_id,
     return render_to_response(template_name,
                               {'content': content,
                                'changesets': chsets},
-                              context_instance=RequestContext(request))
-
-
-@staff_member_required
-def admin_changeset_revert(request, story_id, revision_id,
-    template_name='admin/content/changeset_revert.html'):
-
-    try:
-        story = Story.objects.get(pk=story_id)
-    except Story.DoesNotExist:
-        raise Http404
-
-    if request.method == 'POST':
-        if 'confirm' in request.POST:
-            story.revert_to(revision_id)
-            return HttpResponseRedirect('../../')
-        elif 'cancel' in request.POST:
-            return HttpResponseRedirect('../../changesets/')
-
-    changeset = story.changeset_set.get(revision=revision_id)
-
-    return render_to_response(template_name,
-                              {'story': story,
-                               'changeset': changeset},
                               context_instance=RequestContext(request))
 
 
@@ -115,3 +91,62 @@ class ContentDetailView(DetailView, ContentViewMixin):
         if self.template_name is not None and self.template_name != '':
             return self.template_name
         return ContentViewMixin.get_template_names(self, 'detail')
+
+
+def get_sub_categories(category):
+    qs = category.get_descendants()
+    categories = [category.pk]
+    for node in qs:
+        categories.append(node.pk)
+    return categories
+
+
+class CategoryContentViewMixin(ContentViewMixin):
+
+    def dispatch(self, request, *args, **kwargs):
+        if not hasattr(self, 'category'):
+            try:
+                self.category = get_category_for_path(self.kwargs["path"])
+            except:
+                raise Http404
+        return super(CategoryContentViewMixin, self).dispatch(request, *args, **kwargs)
+
+    def get_extra_data(self, **kwargs):
+        extra_data = {}
+        extra_data['category'] = self.category
+        return extra_data
+
+    def _get_templates(self, name):
+        opts = self.model._meta
+        app_label = opts.app_label
+        path = CategoryContent.get_path(self.category)
+        return ["%s/%ss/%s/%s.html" % (app_label, opts.object_name.lower(), path, name)]
+
+
+class CategoryContentListView(CategoryContentViewMixin, ContentListView):
+    model = CategoryContent
+
+    def get_context_data(self, **kwargs):
+        context = super(CategoryContentListView, self).get_context_data(**kwargs)
+
+        paginator = Paginator(self.qs, settings.POSTS_PER_PAGE)
+        page = self.request.GET.get("page")
+        try:
+            posts = paginator.page(page)
+        except PageNotAnInteger:
+            posts = paginator.page(1)
+        except EmptyPage:
+            posts = paginator.page(paginator.num_pages)
+
+        context['object_list'] = posts
+        return context
+
+    def get_queryset(self):
+        qs = super(CategoryContentListView, self).get_queryset()
+        self.qs = qs.filter(categories__in=get_sub_categories(self.category))
+
+        return qs
+
+
+class CategoryContentDetailView(CategoryContentViewMixin, ContentDetailView):
+    model = CategoryContent

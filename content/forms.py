@@ -6,11 +6,13 @@ from django.contrib.sites.models import Site
 from django.utils.translation import ugettext as _
 from django.conf import settings
 
-from .models import Content
+from .models import Content, Category, CategoryContent
 from taggit.models import Tag
 from django_select2.fields import AutoModelSelect2TagField
+from widgets import MpttTreeWidget
 
 WIDGET_ATTRS = {'size': '85'}
+
 
 class TagField(AutoModelSelect2TagField):
     queryset = Tag.objects
@@ -19,9 +21,10 @@ class TagField(AutoModelSelect2TagField):
     def get_model_field_values(self, value):
         return {'name': value}
 
+
 class ContentForm(forms.ModelForm):
     if 'taggit' in settings.INSTALLED_APPS:
-       tags = TagField(required=False)
+        tags = TagField(required=False)
 
     non_staff_author = forms.CharField(
         widget=forms.TextInput(attrs=WIDGET_ATTRS),
@@ -31,6 +34,7 @@ class ContentForm(forms.ModelForm):
 
     class Meta:
         model = Content
+        fields = "__all__"
 
     def __init__(self, *args, **kwargs):
         initial = kwargs.get('initial', {})
@@ -43,3 +47,11 @@ class ContentForm(forms.ModelForm):
             initial['tags'] = instance.tags.all()
         kwargs.update({'initial': initial})
         super(ContentForm, self).__init__(*args, **kwargs)
+
+
+class CategoryContentForm(ContentForm):
+    categories = forms.ModelMultipleChoiceField(required=True, queryset=Category.objects.all(), widget=MpttTreeWidget)
+
+    class Meta:
+        model = CategoryContent
+        fields = "__all__"

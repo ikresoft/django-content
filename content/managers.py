@@ -46,8 +46,8 @@ class CurrentSiteManager(PolymorphicManager):
         return super(CurrentSiteManager, self).get_queryset().filter(**{self.__field_name + '__id__exact': site_settings.SITE_ID})
 
 class CurrentSitePublishedManager(CurrentSiteManager):
-    def get_query_set(self):
-        queryset = super(CurrentSitePublishedManager, self).get_query_set()
+    def get_queryset(self):
+        queryset = super(CurrentSitePublishedManager, self).get_queryset()
         return queryset.filter(
             date_modified__lte=timezone.now()
         ).filter(
@@ -101,7 +101,7 @@ class AlternateManager(CurrentSiteManager):
 
 class PopularContentManager(CurrentSiteManager):
 
-    def get_query_set(self):
-        qs = super(PopularContentManager, self).get_query_set()
+    def get_queryset(self):
+        qs = super(PopularContentManager, self).get_queryset()
         content_type = ContentType.objects.get_for_model(self.model).pk
         return qs.extra(select={"counter": "SELECT hits from hitcount_hit_count where content_type_id = %s and object_pk = id" % content_type}).order_by('-counter')
