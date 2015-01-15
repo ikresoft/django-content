@@ -59,7 +59,7 @@ DEFAULT_SETTINGS = {
     'STATUS_CHOICES': DEFAULT_STATUS_CHOICES,
     'THROW_404': True,
     'USE_REVERSION': False,
-    'USE_TRANSLATION': 'modeltranslation' in settings.INSTALLED_APPS,
+    'USE_TRANSLATION': 'modeltranslation' in settings.INSTALLED_APPS and settings.USE_I18N,
     'WIDGET': 'ckeditor_filer.widgets.CKEditorWidget',
     'WIDGET_ATTRS': None,
     'WIDGET_FIELDS': ['body', ]
