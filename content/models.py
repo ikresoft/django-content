@@ -14,6 +14,7 @@ from django.template.loader import select_template
 from django.template import Context
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
+from django.utils.encoding import force_unicode
 from django.utils import timezone
 from polymorphic import PolymorphicModel
 from content import settings
