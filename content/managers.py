@@ -7,6 +7,7 @@ from content import settings
 
 from django.utils import timezone
 
+
 class CurrentSiteManager(PolymorphicManager):
     "Use this to limit objects to those associated with the current site."
     def __init__(self, field_name=None):
@@ -44,6 +45,7 @@ class CurrentSiteManager(PolymorphicManager):
         if not self.__is_validated:
             self._validate_field_name()
         return super(CurrentSiteManager, self).get_queryset().filter(**{self.__field_name + '__id__exact': site_settings.SITE_ID})
+
 
 class CurrentSitePublishedManager(CurrentSiteManager):
     def get_queryset(self):
@@ -98,6 +100,7 @@ class AlternateManager(CurrentSiteManager):
             date_modified__lte=timezone.now()
         ).filter(
             status__exact=settings.PUBLISHED_STATUS)
+
 
 class PopularContentManager(CurrentSiteManager):
 

@@ -250,4 +250,8 @@ class CategoryContentAdmin(ContentAdmin):
         }),)
     form = CategoryContentForm
 
-admin.site.register(Category)
+
+class CategoryAdmin(AdminModel):
+    prepopulated_fields = {'slug': ('name',)}
+
+admin.site.register(Category, CategoryAdmin)
