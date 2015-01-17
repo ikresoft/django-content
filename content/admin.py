@@ -12,6 +12,7 @@ from content import settings
 from models import Category
 from .forms import ContentForm, CategoryContentForm
 from .utils import load_widget
+from categories.base import CategoryBaseAdmin
 
 
 HAS_RELATIONS = 'content.relations' in site_settings.INSTALLED_APPS and settings.RELATIONS
@@ -251,7 +252,7 @@ class CategoryContentAdmin(ContentAdmin):
     form = CategoryContentForm
 
 
-class CategoryAdmin(AdminModel):
+class CategoryAdmin(CategoryBaseAdmin, AdminModel):
     prepopulated_fields = {'slug': ('name',)}
 
 admin.site.register(Category, CategoryAdmin)
