@@ -12,7 +12,7 @@ from django.template import RequestContext
 from django.views.generic import ListView, DetailView
 
 from content import settings
-from .models import Content, CategoryContent
+from .models import Content, CategoryContent, Category
 from categories.views import get_category_for_path
 
 
@@ -106,7 +106,7 @@ class CategoryContentViewMixin(ContentViewMixin):
     def dispatch(self, request, *args, **kwargs):
         if not hasattr(self, 'category'):
             try:
-                self.category = get_category_for_path(self.kwargs["path"])
+                self.category = get_category_for_path(self.kwargs["path"], queryset=Category.objects.all())
             except:
                 raise Http404
         return super(CategoryContentViewMixin, self).dispatch(request, *args, **kwargs)

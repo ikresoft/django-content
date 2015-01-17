@@ -1,7 +1,7 @@
 from django import template
 from django.template import TemplateSyntaxError
 from categories.views import get_category_for_path
-from content.models import CategoryContent
+from content.models import CategoryContent, Category
 
 register = template.Library()
 
@@ -50,14 +50,14 @@ def get_content_by_categories(parser, token):
     try:
         tag_name, categories, limit, random, _as, var_name = token.split_contents()
     except:
-        raise TemplateSyntaxError, "get_content_by_category tag takes exactly four arguments"
+        raise TemplateSyntaxError("get_content_by_category tag takes exactly four arguments")
     categories_array = []
     if categories != '':
         if (categories[0] == categories[-1] and categories[0] in ('"', "'")):
             try:
                 cats = [x.strip() for x in categories[1:-1].split(',')]
                 for cat in cats:
-                    categories_array.append(get_category_for_path(cat))
+                    categories_array.append(get_category_for_path(cat, queryset=Category.objects.all()))
             except:
                 pass
         else:
@@ -108,7 +108,7 @@ def get_latest_content(parser, token):
             try:
                 cats = [x.strip() for x in category[1:-1].split(',')]
                 for cat in cats:
-                    category_list.append(get_category_for_path(cat))
+                    category_list.append(get_category_for_path(cat, queryset=Category.objects.all()))
             except:
                 pass
         else:
@@ -156,7 +156,7 @@ def get_popular_content(parser, token):
     if category != '':
         if (category[0] == category[-1] and category[0] in ('"', "'")):
             try:
-                category = get_category_for_path(category[1:-1])
+                category = get_category_for_path(category[1:-1], queryset=Category.objects.all())
             except:
                 category = None
         else:
