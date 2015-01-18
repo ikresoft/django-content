@@ -66,8 +66,19 @@ DEFAULT_SETTINGS = {
 }
 
 USER_SETTINGS = getattr(settings, 'CONTENT_SETTINGS', {})
+CKEDITOR_SETTINGS = getattr(settings, 'CKEDITOR_CONFIGS', {})
 
 DEFAULT_SETTINGS.update(USER_SETTINGS)
+CKEDITOR_SETTINGS.update({
+    'toolbar_Content': [
+        ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', 'Undo', 'Redo', 'SelectAll'],
+        ['Paragraph', 'Styles', 'Format', 'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', 'RemoveFormat', 'WPMore'], ['Source'],
+        ['Image', 'Youtube', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'Iframe'], ['NumberedList', 'BulletedList', 'Outdent', 'Indent', 'Blockquote',
+        'CreateDiv', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'], ['Link', 'Unlink', 'Anchor'],
+        ['TextColor', 'BGColor'], ['Maximize', 'ShowBlocks'],
+    ],
+    'extraPlugins': 'youtube,wpmore',
+})
 
 RELATIONS = [Q(app_label=al, model=m) for al, m in [x.split('.') for x in DEFAULT_SETTINGS['RELATION_MODELS']]]
 
