@@ -6,6 +6,14 @@ __version_info__ = {
     'serial': 1
 }
 
+try:
+    from django.template.loader import add_to_builtins
+except:
+    from django.template.base import add_to_builtins
+
+
+add_to_builtins('content.templatetags.content_editor_tags')
+
 
 def get_version(short=False):
     assert __version_info__['releaselevel'] in ('alpha', 'beta', 'final')
