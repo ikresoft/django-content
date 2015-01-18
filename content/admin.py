@@ -192,7 +192,7 @@ class ContentAdmin(AdminModel):
     def _get_widget(self):
         attrs = settings.WIDGET_ATTRS
         widget = load_widget(settings.WIDGET) or forms.Textarea
-        return widget(attrs=attrs)
+        return widget(attrs=attrs, **settings.WIDGET_PARAMS)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         """Supply the widget to the body field"""

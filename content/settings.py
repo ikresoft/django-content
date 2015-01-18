@@ -61,24 +61,35 @@ DEFAULT_SETTINGS = {
     'USE_REVERSION': False,
     'USE_TRANSLATION': 'modeltranslation' in settings.INSTALLED_APPS and settings.USE_I18N,
     'WIDGET': 'ckeditor.widgets.CKEditorWidget',
+    'WIDGET_PARAMS': {"config_name": "content"},
     'WIDGET_ATTRS': None,
     'WIDGET_FIELDS': ['body', ]
 }
 
 USER_SETTINGS = getattr(settings, 'CONTENT_SETTINGS', {})
 CKEDITOR_SETTINGS = getattr(settings, 'CKEDITOR_CONFIGS', {})
+CONTENT_CKEDITOR_SETTINGS = getattr(settings, 'CONTENT_CKEDITOR_CONFIGS', {})
 
 DEFAULT_SETTINGS.update(USER_SETTINGS)
 CKEDITOR_SETTINGS.update({
-    'toolbar_Content': [
-        ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', 'Undo', 'Redo', 'SelectAll'],
-        ['Paragraph', 'Styles', 'Format', 'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', 'RemoveFormat', 'WPMore'], ['Source'],
-        ['Image', 'Youtube', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'Iframe'], ['NumberedList', 'BulletedList', 'Outdent', 'Indent', 'Blockquote',
-        'CreateDiv', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'], ['Link', 'Unlink', 'Anchor'],
-        ['TextColor', 'BGColor'], ['Maximize', 'ShowBlocks'],
-    ],
-    'extraPlugins': 'youtube,wpmore',
+    "content": {
+        'toolbar_Content': [
+            ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', 'Undo', 'Redo', 'SelectAll'],
+            ['Paragraph', 'Styles', 'Format', 'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', 'RemoveFormat', 'WPMore'], ['Source'],
+            ['Image', 'Youtube', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'Iframe'], ['NumberedList', 'BulletedList', 'Outdent', 'Indent', 'Blockquote',
+            'CreateDiv', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'], ['Link', 'Unlink', 'Anchor'],
+            ['TextColor', 'BGColor'], ['Maximize', 'ShowBlocks'],
+        ],
+        'toolbar': 'Content',
+        'height': 300,
+        'width': '100%',
+        'filebrowserBrowseUrl': "/url-browser/form-view/?_popup=1",
+        'filebrowserUploadUrl': None,
+        'extraPlugins': 'youtube,wpmore',
+    }
 })
+
+CKEDITOR_SETTINGS.update(CONTENT_CKEDITOR_SETTINGS)
 
 RELATIONS = [Q(app_label=al, model=m) for al, m in [x.split('.') for x in DEFAULT_SETTINGS['RELATION_MODELS']]]
 
