@@ -1,5 +1,6 @@
 from django import template
 from django.template import TemplateSyntaxError
+from django.utils import translation
 from categories.views import get_category_for_path
 from content.models import CategoryContent, Category
 
@@ -9,6 +10,17 @@ register = template.Library()
 @register.filter
 def content_url(value, category):
     return value.get_absolute_url(category)
+
+
+@register.simple_tag(takes_context=True)
+def get_next_path(context, lang):
+    request = context["request"]
+    if hasattr(request, 'content_object'):
+        translation.activate(lang)
+        s = request.content_object.get_absolute_url(None, lang)
+        translation.deactivate()
+        return s
+    return request.get_full_path()
 
 
 class ContentByCategoriesNode(template.Node):

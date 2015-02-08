@@ -10,7 +10,7 @@ from django.utils.functional import curry
 
 from content import settings
 from models import Category
-from .forms import ContentForm, CategoryContentForm
+from .forms import ContentForm, CategoryContentForm, CategoryAdminForm
 from .utils import load_widget
 from categories.base import CategoryBaseAdmin
 
@@ -253,6 +253,6 @@ class CategoryContentAdmin(ContentAdmin):
 
 
 class CategoryAdmin(CategoryBaseAdmin, AdminModel):
-    prepopulated_fields = {'slug': ('name',)}
+    form = CategoryAdminForm
 
 admin.site.register(Category, CategoryAdmin)

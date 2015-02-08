@@ -73,7 +73,7 @@ class Content(PolymorphicModel):
         get_latest_by = 'date_modified'
         unique_together = ('date_modified', 'slug')
 
-    def get_absolute_url(self):
+    def get_absolute_url(self, lang=None):
         pass
 
     def get_image(self):
@@ -215,7 +215,7 @@ class CategoryContent(Content):
         path = '/'.join([force_unicode(i.slug) for i in ancestors])
         return path
 
-    def get_absolute_url(self, category=None):
+    def get_absolute_url(self, category=None, lang=None):
         if self.category is None:
             category = self.categories.all()[0]
         return reverse('category_content_detail', args=[CategoryContent.get_path(category), self.slug])

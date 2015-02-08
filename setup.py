@@ -6,7 +6,7 @@ github_url = 'https://github.com/ikresoft/django-content'
 
 setup(
     name='django-content',
-    version='1.0',
+    version='1.1',
     description='Django base content',
     long_description='Django base content',
     author='Enver Bisevac, Mirza Delic',
@@ -16,7 +16,7 @@ setup(
     include_package_data=True,
     license='MIT License',
     classifiers=[
-        'Development Status :: 1 - Alpha',
+        'Development Status :: 1.1 - Beta',
         'Environment :: Web Environment',
         'Framework :: Django, Django Base Content',
         'Intended Audience :: Developers',

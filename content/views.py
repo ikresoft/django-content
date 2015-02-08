@@ -150,3 +150,7 @@ class CategoryContentListView(CategoryContentViewMixin, ContentListView):
 
 class CategoryContentDetailView(CategoryContentViewMixin, ContentDetailView):
     model = CategoryContent
+
+    def get(self, request, *args, **kwargs):
+        request.content_object = self.get_object()
+        return super(CategoryContentDetailView, self).get(request, *args, **kwargs)
