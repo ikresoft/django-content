@@ -144,7 +144,6 @@ class CategoryContentListView(CategoryContentViewMixin, ContentListView):
     def get_queryset(self):
         qs = super(CategoryContentListView, self).get_queryset()
         self.qs = qs.filter(categories__in=get_sub_categories(self.category))
-
         return qs
 
 

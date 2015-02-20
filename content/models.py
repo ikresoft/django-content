@@ -80,7 +80,7 @@ class Content(PolymorphicModel):
         from bs4 import BeautifulSoup
         from filer.models.imagemodels import Image
         soup = BeautifulSoup(self.body)
-        img_tag = soup.find("img", { "front_image" : "true" })
+        img_tag = soup.find("img", { "class" : "front_image" })
         try:
             id = int(img_tag["filer_id"])
             return Image.objects.get(pk=id)
