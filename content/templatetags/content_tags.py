@@ -69,7 +69,11 @@ def get_content_by_categories(parser, token):
             try:
                 cats = [x.strip() for x in categories[1:-1].split(',')]
                 for cat in cats:
-                    categories_array.append(get_category_for_path(cat, queryset=Category.objects.all()))
+                    try:
+                        sel_categories = get_category_for_path(cat, queryset=Category.objects.all())
+                    except:
+                        sel_categories = Category.objects.get(pk=int(cat))
+                    categories_array.append(sel_categories)
             except:
                 pass
         else:
