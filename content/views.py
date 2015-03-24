@@ -129,7 +129,7 @@ class CategoryContentListView(CategoryContentViewMixin, ContentListView):
     def get_context_data(self, **kwargs):
         context = super(CategoryContentListView, self).get_context_data(**kwargs)
 
-        paginator = Paginator(self.qs, settings.POSTS_PER_PAGE)
+        paginator = Paginator(self.qs, 10)
         page = self.request.GET.get("page")
         try:
             posts = paginator.page(page)
