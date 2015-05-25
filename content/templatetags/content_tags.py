@@ -29,7 +29,7 @@ class ContentByCategoriesNode(template.Node):
         self.var_name = var_name
         self.categories = categories
         self.limit = int(limit)
-        self.random = True if random is True else False
+        self.random = random
         self.model = CategoryContent
 
     def render(self, context):
@@ -44,7 +44,7 @@ class ContentByCategoriesNode(template.Node):
                 query = query.filter(categories__in=self.categories)
 
             ordering = '-date_modified'
-            if self.random is True:
+            if self.random:
                 ordering = '?'
             query = query.order_by(ordering)
             if self.limit == -1:
