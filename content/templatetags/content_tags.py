@@ -12,6 +12,39 @@ def content_url(value, category):
     return value.get_absolute_url(category)
 
 
+class CategoryNode(template.Node):
+
+    def __init__(self, category, var_name):
+        self.var_name = var_name
+        self.category = category
+        self.model = Category
+
+    def render(self, context):
+        if self.category is None:
+            context[self.var_name] = None
+            return ''
+
+        context[self.var_name] = self.category
+        return ''
+
+
+def get_category_as_var(parser, token):
+    try:
+        tag_name, value, _as, var_name = token.split_contents()
+    except:
+        raise TemplateSyntaxError("get_content_by_category tag takes exactly 2 arguments")
+    if value != '':
+        if (value[0] == value[-1] and value[0] in ('"', "'")):
+            try:
+                category = get_category_for_path(value, queryset=Category.objects.all())
+            except:
+                category = Category.objects.get(pk=int(value))
+        else:
+            category = Category.objects.get(pk=value)
+    return CategoryNode(category, var_name)
+register.tag('get_category', get_category_as_var)
+
+
 @register.simple_tag(takes_context=True)
 def get_next_path(context, lang):
     request = context["request"]
