@@ -5,7 +5,6 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import Http404
 from django.template import TemplateDoesNotExist
-from django.template.loader import find_template
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
@@ -47,6 +46,11 @@ class ContentViewMixin(object):
             "%s/%s.html" % (app_label, name),
             "%s.html" % name
         ]
+        try:
+            from django.template.loader import find_template
+        except:
+            from django.template import select_template
+            find_template = select_template
         for template in search_templates:
             try:
                 find_template(template)
