@@ -1,7 +1,8 @@
 from django import template
-from BeautifulSoup import BeautifulSoup
+
 
 register = template.Library()
+
 
 @register.filter
 def add_attribute(tag, arg):
@@ -21,6 +22,6 @@ def add_attribute(tag, arg):
     try:
         attr, val = arg.split('=')
         tag[attr] = val
-    except Exception, e:
+    except Exception:
         pass
     return tag

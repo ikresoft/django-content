@@ -102,7 +102,7 @@ class ContentAdmin(AdminModel):
     quick_editable = settings.QUICKEDIT_FIELDS
 
     search_fields = settings.ADMIN_EXTRAS.get('SEARCH_FIELDS', ('title',))
-    date_hierarchy = 'date_modified'
+    #date_hierarchy = 'date_modified'
 
     form = ContentForm
 

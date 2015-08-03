@@ -38,7 +38,6 @@ class Content(PolymorphicModel):
         settings.AUTHOR_MODEL,
         verbose_name=_('Authors'),
         blank=True,
-        null=True,
         limit_choices_to=settings.AUTHOR_MODEL_LIMIT_CHOICES)
 
     non_staff_author = models.CharField(
@@ -208,7 +207,7 @@ class Category(CategoryBase):
 
 
 class CategoryContent(Content):
-    categories = models.ManyToManyField(Category, null=True, blank=True)
+    categories = models.ManyToManyField(Category, blank=True)
     allow_pings = models.BooleanField(_('Allow pings'), default=True)
     is_sticky = models.BooleanField(default=False)
 

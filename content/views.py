@@ -48,17 +48,18 @@ class ContentViewMixin(object):
         ]
         try:
             from django.template.loader import find_template
+            for template in search_templates:
+                try:
+                    find_template(template)
+                    return [template]
+                except TemplateDoesNotExist:
+                    pass
+            else:
+                raise Exception("Template does not exist!")
         except:
-            from django.template import select_template
-            find_template = select_template
-        for template in search_templates:
-            try:
-                find_template(template)
-                return [template]
-            except TemplateDoesNotExist:
-                pass
-        else:
-            pass
+            # Django 1.8 support
+            from django.template import Engine
+            return Engine.get_default().select_template(search_templates)
 
 
 class ContentListView(ContentViewMixin, ListView):
