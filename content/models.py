@@ -202,6 +202,38 @@ class Category(CategoryBase):
     def short_title(self):
         return self.name
 
+    @classmethod
+    def get_category_for_path(cls, path):
+
+        def _get_category_for_path(path, lang=None):
+            path_items = path.strip('/').split('/')
+            suffix = ""
+            if lang:
+                suffix = "_%s" % lang.lower().replace('-', '_')
+            filters = {
+                'slug%s__iexact' % suffix: path_items[-1]
+            }
+            if len(path_items) >= 2:
+                filters.update({
+                    'parent__slug%s__iexact' % suffix: path_items[-2]
+                })
+                queryset = cls.objects.filter(
+                    level=len(path_items) - 1,
+                    **filters)
+            else:
+                queryset = cls.objects.filter(
+                    level=len(path_items) - 1,
+                    **filters)
+            return queryset.get()
+
+        try:
+            category = _get_category_for_path(path)
+        except Category.DoesNotExist:
+            # fallback
+            category = _get_category_for_path(path, site_settings.DEFAULT_LANGUAGE)
+        print "Category", category
+        return category
+
     class Meta(CategoryBase.Meta):
         verbose_name_plural = 'Categories'
 
@@ -212,12 +244,15 @@ class CategoryContent(Content):
     is_sticky = models.BooleanField(default=False)
 
     @classmethod
-    def get_path(cls, category):
+    def get_path(cls, category, lang=None):
         ancestors = list(category.get_ancestors()) + [category, ]
-        path = '/'.join([force_unicode(i.slug) for i in ancestors])
+        suffix = ""
+        if lang:
+            suffix = "_%s" % lang
+        path = '/'.join([force_unicode(getattr(i, "slug%s" % suffix, "")) for i in ancestors])
         return path
 
     def get_absolute_url(self, category=None, lang=None):
         if self.category is None:
             category = self.categories.all()[0]
-        return reverse('category_content_detail', args=[CategoryContent.get_path(category), self.slug])
+        return reverse('category_content_detail', args=[CategoryContent.get_path(category, lang), self.slug])

@@ -12,7 +12,6 @@ from django.views.generic import ListView, DetailView
 
 from content import settings
 from .models import Content, CategoryContent, Category
-from categories.views import get_category_for_path
 
 
 @staff_member_required
@@ -79,7 +78,7 @@ class ContentListView(ContentViewMixin, ListView):
         return ContentViewMixin.get_template_names(self, 'list')
 
 
-class ContentDetailView(DetailView, ContentViewMixin):
+class ContentDetailView(ContentViewMixin, DetailView):
     model = Content
 
     def get_context_data(self, **kwargs):
@@ -95,7 +94,7 @@ class ContentDetailView(DetailView, ContentViewMixin):
     def get_template_names(self):
         if self.template_name is not None and self.template_name != '':
             return self.template_name
-        return ContentViewMixin.get_template_names(self, 'detail')
+        return super(ContentDetailView, self).get_template_names('detail')
 
 
 def get_sub_categories(category):
@@ -111,8 +110,8 @@ class CategoryContentViewMixin(ContentViewMixin):
     def dispatch(self, request, *args, **kwargs):
         if not hasattr(self, 'category'):
             try:
-                self.category = get_category_for_path(self.kwargs["path"], queryset=Category.objects.all())
-            except:
+                self.category = Category.get_category_for_path(self.kwargs["path"])
+            except Category.DoesNotExist:
                 raise Http404
         return super(CategoryContentViewMixin, self).dispatch(request, *args, **kwargs)
 

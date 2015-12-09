@@ -12,7 +12,7 @@ from views import CategoryContentListView, CategoryContentDetailView
 urlpatterns = patterns('',
     # post detail
     url(
-        r'^category/(?P<path>.+)/(?P<slug>[-\w]+)/$',
+        r'^(?P<path>.+)/(?P<slug>[-\w]+)/$',
         CategoryContentDetailView.as_view(),
         name='category_content_detail'
     ),

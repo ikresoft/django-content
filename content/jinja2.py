@@ -1,4 +1,3 @@
-from categories.views import get_category_for_path
 from content.models import CategoryContent, Category
 
 
@@ -9,7 +8,7 @@ def get_content_by_categories(categories, limit, random=False):
         categories = []
         for cat in cats:
             try:
-                sel_categories = get_category_for_path(cat, queryset=Category.objects.all())
+                sel_categories = Category.get_category_for_path(cat)
             except:
                 sel_categories = Category.objects.get(pk=int(cat))
             categories.append(sel_categories)

@@ -1,7 +1,6 @@
 from django import template
 from django.template import TemplateSyntaxError
 from django.utils import translation
-from categories.views import get_category_for_path
 from content.models import CategoryContent, Category
 
 register = template.Library()
@@ -36,7 +35,7 @@ def get_category_as_var(parser, token):
     if value != '':
         if (value[0] == value[-1] and value[0] in ('"', "'")):
             try:
-                category = get_category_for_path(value, queryset=Category.objects.all())
+                category = Category.get_category_for_path(value)
             except:
                 category = Category.objects.get(pk=int(value))
         else:
@@ -103,7 +102,7 @@ def get_content_by_categories(parser, token):
                 cats = [x.strip() for x in categories[1:-1].split(',')]
                 for cat in cats:
                     try:
-                        sel_categories = get_category_for_path(cat, queryset=Category.objects.all())
+                        sel_categories = Category.get_category_for_path(cat)
                     except:
                         sel_categories = Category.objects.get(pk=int(cat))
                     categories_array.append(sel_categories)
@@ -157,7 +156,7 @@ def get_latest_content(parser, token):
             try:
                 cats = [x.strip() for x in category[1:-1].split(',')]
                 for cat in cats:
-                    category_list.append(get_category_for_path(cat, queryset=Category.objects.all()))
+                    category_list.append(Category.get_category_for_path(cat))
             except:
                 pass
         else:
@@ -205,7 +204,7 @@ def get_popular_content(parser, token):
     if category != '':
         if (category[0] == category[-1] and category[0] in ('"', "'")):
             try:
-                category = get_category_for_path(category[1:-1], queryset=Category.objects.all())
+                category = Category.get_category_for_path(category[1:-1])
             except:
                 category = None
         else:
